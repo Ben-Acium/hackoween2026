@@ -1,0 +1,8 @@
+# Per-user RustDesk config for the Hackoween demo (lab VM only).
+# Lands at %APPDATA%\RustDesk\config\RustDesk2.toml — user-writable, no admin needed.
+# Points the portable client at the isolated lab rendezvous server.
+[options]
+custom-rendezvous-server = '10.13.37.5'
+relay-server = '10.13.37.5'
+api-server = 'http://10.13.37.5'
+key = 'YOUR_LAB_HBBS_PUBKEY=='
