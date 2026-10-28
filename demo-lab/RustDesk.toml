@@ -1,0 +1,12 @@
+# Main RustDesk config for the Hackoween demo (lab VM only).
+# Lands at %APPDATA%\RustDesk\config\RustDesk.toml — user-writable, no admin needed.
+#
+# This seeds the PERMANENT password so the operator connects with a known value instead
+# of the client's random one-time code. On portable/user-level RustDesk (no service),
+# the `--password` CLI flag is a no-op, so we set it here in the config instead.
+#
+# RustDesk reads this field and, because the value has no encryption prefix, treats it as
+# plaintext — so the literal string below becomes the permanent password. The client may
+# re-save it in encrypted form on first run; the password itself stays 'hackoween'.
+# id / salt / key pair are intentionally omitted — the client generates those on launch.
+password = 'hackoween'

@@ -28,7 +28,7 @@ The audience sees cause → effect → detection simultaneously. That split-scre
 ### Act 1 — Initial access → foothold: USB to portable RustDesk
 - **What the audience sees:** the operator plugs the Flipper into the victim; it types one line into a **visible** PowerShell window that pulls a bootstrap from the lab web server. Seconds later a portable RustDesk client is running and its ID appears in the operator's console. One motion: physical access straight to remote control.
 - **Beat:** *physical access = code execution*, and ten seconds later the machine is being driven from across the room. No admin required.
-- **How it works (all user-level, no elevation):** the Flipper (US keyboard layout) types a short `iwr … | iex` cradle → `stage.ps1` on the lab web server (`10.13.37.5`) downloads the **portable** `rustdesk.exe` into `%TEMP%` and a per-user config into `%APPDATA%\RustDesk\config\`, then launches it as the logged-in user. No installer, no service, no UAC. RustDesk points at the lab rendezvous server (hbbs), never the public relay. Artifacts live in `demo-lab/` (`act1-badusb.txt`, `stage.ps1`, `RustDesk2.toml`).
+- **How it works (all user-level, no elevation):** the Flipper (US keyboard layout) types a short `iwr … | iex` cradle → `stage.ps1` on the lab web server (`64.58.102.35`) downloads the **portable** `rustdesk.exe` into `%TEMP%` and a per-user config into `%APPDATA%\RustDesk\config\`, then launches it as the logged-in user. No installer, no service, no UAC. RustDesk points at our own self-hosted rendezvous server (hbbs) at `64.58.102.35`, never the public rustdesk.com relay network. Artifacts live in `demo-lab/` (`act1-badusb.txt`, `stage.ps1`, `RustDesk2.toml`).
 - **Why user-level (not the installer):** the repo's `Install-RustDesk.ps1` is an admin fleet installer (service + Program Files) — deliberately *not* used here. Running portable as the current user avoids UAC entirely and is the sharper teaching point: the attacker never needed admin.
 - **Blue callouts (this act is loud despite no admin):**
   - A brand-new HID keyboard that instantly spawns PowerShell — no human types that fast.
@@ -65,7 +65,7 @@ Replay the defender pane's timeline and map each alert back to its act. This rec
 - Compose the three VM screens into one projector feed: a software multi-viewer, a hardware switcher, or simply pre-arranged windows on one presenter desktop. Verify legibility from the back of the room.
 - Confidence monitor for the presenters; lav mic for the Blue narrator so callouts carry.
 
-- **Lab web server** at `10.13.37.5` serving the Act 1 artifacts (`stage.ps1`, `rustdesk.exe` portable, `RustDesk2.toml`) and the lab **RustDesk rendezvous server (hbbs)** — both on the isolated network only.
+- **Lab web server** at `64.58.102.35` serving the Act 1 artifacts (`stage.ps1`, `rustdesk.exe` portable, `RustDesk2.toml`) and the lab **RustDesk rendezvous server (hbbs)** on the same host (Docker). This host is **publicly routable** — not host-only. Restrict it with a firewall allowlist (lab egress IP only) before the show, and see the isolation note below.
 
 **Remote-access tooling note:** Act 1 uses RustDesk in **portable/user-level mode** as the foothold — the "attackers abuse a legitimate remote-access tool" angle, which is a real, topical TTP. The repo's `Install-RustDesk.ps1` is the *admin fleet installer* and is **not** used in the demo (it needs elevation + a service); it stays as a separate IT artifact. Placeholder key `YOUR_LAB_HBBS_PUBKEY==` in `demo-lab/RustDesk2.toml` needs the real hbbs public key before rehearsal.
 
@@ -96,6 +96,7 @@ Shorter 30–45 min slot: compress Act 3 to a single loot example and trim Q&A.
 
 ## Open decisions
 
-- [ ] **Lab hbbs public key** — fill `YOUR_LAB_HBBS_PUBKEY==` in `demo-lab/RustDesk2.toml` once the rendezvous server is stood up (IP is set to `10.13.37.5`).
+- [x] **Lab hbbs public key** — filled in `demo-lab/RustDesk2.toml`; server IP set to `64.58.102.35` (hbbs + web server, Docker).
+- [ ] **Isolation vs. public host** — the server is on a public IP, which contradicts the "not connected to the internet" lines in the intro/recap script. Either (a) reword the script to "our own self-hosted server" instead of claiming full air-gap, or (b) firewall the host to the lab egress IP only. Decide before rehearsal.
 - [ ] **One presenter or two** (Red + Blue) — drives the mic/stage setup.
 - [ ] **Slot length** confirmed (60 min assumed above).

@@ -1,0 +1,30 @@
+# Hackoween 2026 — Act 1 lab web server (serves the HID bootstrap payloads).
+# Runs on the same Docker host as the RustDesk hbbs/hbbr (64.58.102.35).
+#
+# Serves exactly three files over HTTP:80, the ones stage.ps1 / act1-badusb.txt fetch:
+#   http://64.58.102.35/stage.ps1
+#   http://64.58.102.35/RustDesk2.toml
+#   http://64.58.102.35/rustdesk.exe
+#
+# The two text artifacts are bind-mounted read-only straight from ../ so there is a
+# single source of truth (edit the real files, not copies). Drop the portable
+# rustdesk.exe next to this file before `docker compose up`.
+#
+# SECURITY: this host is publicly routable. Serving an attack bootstrap over plaintext
+# HTTP on the open internet is exactly what the plan's isolation note warns about.
+# Firewall port 80 to the lab's egress IP only — do NOT leave it open to 0.0.0.0.
+# The example below binds to all interfaces because the victim VM's egress IP isn't
+# known here; lock it down at the host firewall (ufw/iptables/cloud security group).
+
+services:
+  lab-web:
+    image: nginx:alpine
+    container_name: hackoween-lab-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ../stage.ps1:/usr/share/nginx/html/stage.ps1:ro
+      - ../RustDesk2.toml:/usr/share/nginx/html/RustDesk2.toml:ro
+      - ./rustdesk.exe:/usr/share/nginx/html/rustdesk.exe:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
